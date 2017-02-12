@@ -56,7 +56,7 @@ namespace OverPass{
 		}
 		inline bool operator!= (const Quaternion& rhs) const
 		{
-			return !operator==(rhs);
+			return !(*this == rhs);
 		}
 		Vector3 operator* (const Vector3& v) const;
 		float normalise(void);
