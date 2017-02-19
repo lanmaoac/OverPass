@@ -1,6 +1,10 @@
 #include "OverPassSceneNode.h"
+#include "OverPassSceneManager.h"
+#include "OverPassQuaternion.h"
+#include "OverPassSceneManager.h"
 namespace OverPass
 {
+	
 	SceneNode::SceneNode(SceneManager* creator)
 		:Node()
 		,mCreator(creator)
@@ -15,6 +19,8 @@ namespace OverPass
 	{
 		needUpdate();
 	}
+	
+	
 	SceneNode::~SceneNode()
 	{
 		ObjectMap::iterator itr;
@@ -48,9 +54,9 @@ namespace OverPass
 		{
 			mIsInSceneGraph = inGraph;
 			ChildNodeMap::iterator child;
-			for (child = mObjectByName.begin(); child != mObjectByName.end(); child++)
+			for (child = mChildren.begin(); child != mChildren.end(); child++)
 			{
-				SceneNode* sceneChild = static_cast<SceneNode>(child->second);
+				SceneNode* sceneChild = static_cast<SceneNode*>(child->second);
 				sceneChild->setInSceneGraph(inGraph);
 			}
 		}
@@ -63,11 +69,12 @@ namespace OverPass
 		}
 		obj->_notifyAttached(this);
 		std::pair<ObjectMap::iterator, bool> insresult =
-			mObjectByName.insert(ObjectMap::value_type(numAttachObjects->getName(),obj));
-		void(insresult);
+			mObjectByName.insert(ObjectMap::value_type(obj->getName(),obj));
+		//void(insresult);
 		needUpdate();
+		printf("has attacked;\n");
 	}
-	int SceneNode::numAttachObjects()
+	int SceneNode::numAttachObjects(void) const
 	{
 		return mObjectByName.size();
 	}
@@ -84,28 +91,36 @@ namespace OverPass
 			//hehe
 		}
 	}
-	MovableObject* SceneNode:: getAttachedObject(const std::string& name)
+	MovableObject* SceneNode::getAttachedObject(const std::string& name)
 	{
-		ObjectMap::iterator	 i = mObjectsByName.find(name);
+		ObjectMap::iterator	 i = mObjectByName.find(name);
 		if (i == mObjectByName.end())
 		{
-			//hhe
+			//hehe
 		}
 		return i->second;
 	}
 	void SceneNode::_findVisibleObjects(RenderQueue* queue, bool includeChildren, bool displayNodes)
 	{
+
+		printf("sceneNodeFinfVisible\n");
 		ObjectMap::iterator iobj;
 		ObjectMap::iterator iobjend = mObjectByName.end();
-		for (iobj = mObjectByName.begin(); i != iobjend; i++)
+		bool hehe=mObjectByName.begin() == iobjend;
+		if (hehe)
+			printf("size is empty\n");
+		else
+			printf("size not empty\n");
+		for (iobj = mObjectByName.begin(); iobj != iobjend; iobj++)
 		{
 			MovableObject* mo = iobj->second;
+			printf("MovableObjectsHasBeenFound\n");
 			queue->processVisibleObject(mo);
 		}
 		if (includeChildren)
 		{
 			ChildNodeMap::iterator  child, childend;
-			mChildren = mObjectByName.end();
+			childend = mChildren.end();
 			for (child = mChildren.begin(); child != childend;++child)
 			{
 				SceneNode* sceneChild = static_cast<SceneNode*>(child->second);
@@ -123,22 +138,23 @@ namespace OverPass
 	void SceneNode::updateFromParentImpl(void) const
 	{
 		Node::updateFromParentImpl();
-		ObjectMap::iterator i;
+		ObjectMap::const_iterator i;
 		for (i = mObjectByName.begin(); i != mObjectByName.end(); i++)
 		{
 			MovableObject* obj = i->second;
 			obj->_notifyMoved();
 		}
 	}
-
+	
 	Node* SceneNode::createChildImpl(void)
 	{
 		return mCreator->createSceneNode();
 	}
-	Node* SceneNode::createChildImpl(std::string& name)
+	Node* SceneNode::createChildImpl(const std::string& name)
 	{
 		return mCreator->createSceneNode(name);
 	}
+	
 
 	SceneNode* SceneNode::createChildSceneNode(const Vector3& inTranslate, const Quaternion& inRotate)
 	{
@@ -160,7 +176,7 @@ namespace OverPass
 		iend = mObjectByName.end();
 		for (i = mObjectByName.begin(); i != iend; i++)
 		{
-			i->second->setVisible();
+			i->second->setVisible(visible);
 		}
 		if (cascade)
 		{
@@ -168,15 +184,15 @@ namespace OverPass
 			oend = mChildren.end();
 			for (oi = mChildren.begin(); oi != oend; oi++)
 			{
-				static_cast<SceneNode*>(i->second)->setVisible(visible, cascade);
+				static_cast<SceneNode*>(oi->second)->setVisible(visible, cascade);
 			}
 		}
 	}
 	void SceneNode::flipVisibility(bool cascade)
 	{
 		ObjectMap::iterator oi, oiend;
-		oiend = mObjectsByName.end();
-		for (oi = mObjectsByName.begin(); oi != oiend; ++oi)
+		oiend = mObjectByName.end();
+		for (oi = mObjectByName.begin(); oi != oiend; ++oi)
 		{
 			oi->second->setVisible(!oi->second->getVisible());
 		}

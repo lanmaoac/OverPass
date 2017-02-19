@@ -116,7 +116,8 @@ namespace OverPass
 			{
 				mDerivedScale = mScale;
 			}
-			mDerivedPosition = parentOrientation*(parentScale*mPosition);
+			mDerivedPosition = mPosition;
+			//mDerivedPosition = parentOrientation*(parentScale*mPosition);
 			mDerivedPosition += mParent->_getDerivedPosition();
 		}
 		else
@@ -243,6 +244,11 @@ namespace OverPass
 		}
 		return mDerivedPosition;
 	}
-
+	//-----------------------------------------------------------------------
+	const Matrix4& Node::_getFullTransform(void) const
+	{
+		//do something later
+		return Matrix4::IDENTITY;
+	}
 }
 

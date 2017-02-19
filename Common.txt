@@ -1,0 +1,28 @@
+extern matrix WorldViewMatrix;
+extern matrix WorldViewProjMatrix; 
+
+struct VS_OUTPUT 
+{
+   float4 Pos:     POSITION;
+};
+
+VS_OUTPUT vs_main( 
+   float3 inPos: POSITION)
+{
+   VS_OUTPUT Out;
+   Out.Pos  =  mul( float4(inPos.xyz,1.0f),WorldViewProjMatrix);
+   return Out;
+}
+float4 ps_main(VS_OUTPUT input) : COLOR0
+{
+    float4 diffuse = float4(0.0f,1.0f,1.0f,1.0f);
+    return diffuse;
+}
+technique Common
+{
+	pass P0
+	{
+		vertexShader  = compile vs_2_0 vs_main();
+                 pixelShader  = compile ps_2_0 ps_main();
+        }
+}

@@ -1,10 +1,11 @@
 #include "OverPassMovableObject.h"
 #include "OverPassSceneNode.h"
+#include "OverPassMatrix4.h"
 namespace OverPass
 {
 	MovableObject::MovableObject()
-		:mManager(0)
-		, mParentNode(0)
+		//:mManager(0)
+		: mParentNode(0)
 		, mVisible(true)
 		, mRenderQueueID(0)
 		, mRenderQueuePriority(100)
@@ -15,7 +16,7 @@ namespace OverPass
 	}
 	MovableObject::MovableObject(const std::string& name)
 		:mName(name)
-		, mManager(0)
+		//, mManager(0)
 		, mParentNode(0)
 		, mVisible(true)
 		, mRenderQueueID(0)
@@ -24,11 +25,12 @@ namespace OverPass
 		, mRenderQueuePrioritySet(false)
 	{
 	}
-	MovableObject::MovableObject()
+	MovableObject::~MovableObject()
 	{
 		if (mParentNode)
 		{
-			static_cast<SceneNode*>(mParentNode)->detachObject(this);
+			//detachAllObject
+			//static_cast<SceneNode*>(mParentNode)->detachObject(this);
 		}
 	}
 	
@@ -83,7 +85,11 @@ namespace OverPass
 		{
 			return mParentNode->_getFullTransform();
 		}
-		return Matrix4&::IDENTITY;
+		return Matrix4::IDENTITY;
 	}
+	bool MovableObject::isAttached(void) const
+	{
+		return (mParentNode != 0);
 
+	}
 }

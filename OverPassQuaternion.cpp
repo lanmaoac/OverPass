@@ -26,10 +26,11 @@ namespace OverPass{
 	{
 		return Quaternion{ fScalar*w,fScalar*x,fScalar*y,fScalar*z };
 	}
-	Quaternion Quaternion::operator-() const
+	Quaternion Quaternion::operator- () const
 	{
 		return Quaternion(-w, -x, -y, -z);
 	}
+	/*
 	Vector3 Quaternion::operator* (const Vector3& v) const
 	{
 		// nVidia SDK implementation
@@ -42,7 +43,7 @@ namespace OverPass{
 
 		return v + uv + uuv;
 
-	}
+	}*/
 	float Quaternion::normalise(void)
 	{
 		float len = Norm();

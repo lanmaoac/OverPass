@@ -1,3 +1,6 @@
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+
 #define WINDOW_WIDTH  932           
 #define WINDOW_HEIGHT 700           
 #define WINDOW_TITLE  _T("3D Engine") 
@@ -7,7 +10,9 @@
 #include <conio.h>
 
 
-
+#include <stdio.h>
+#include <io.h>
+#include <fcntl.h>
 #include <windows.h>
 #include <string.h>
 #include<atlstr.h>  
@@ -20,6 +25,13 @@
 #include "DirectInputClass.h"
 #include "WaterClass.h"
 #include "SkyBoxClass.h"
+
+
+#include "OverPassPrerequisites.h"
+#include "OverPassSceneManager.h"
+#include "OverPassVector3.h"
+#include "OverPassDX9RenderSystem.h"
+
 #pragma comment(lib,"d3d9.lib")
 #pragma comment(lib,"d3dx9.lib")
 #pragma comment(lib, "dinput8.lib")    
@@ -52,6 +64,12 @@ IDirect3DTexture9*           DepthScene = NULL;
 ID3DXMesh *meshP;
 ID3DXMesh *meshT;
 D3DXMATRIX  PreView;
+
+
+
+//场景关系管理
+OverPass::SceneManager* mSceneManager;
+
 
 HRESULT Direct3D_Init(HWND hwnd, HINSTANCE hInstance)
 {
@@ -135,6 +153,42 @@ void Objects_Init()
 	D3DXCreateTeapot(Device, &meshT, 0);
 	D3DXCreateBox(Device, 100.0f, 100.0f, 100.0f, &meshP, 0);
 
+	if (AllocConsole())
+	{
+		freopen("CONOUT$", "w", stdout);
+
+
+
+		std::string mSceneManagerName = "SceneManager";
+		mSceneManager = new OverPass::SceneManager(mSceneManagerName);
+	
+		OverPass::SceneNode* mSceneNode = mSceneManager->createSceneNode();
+		std::string mEntityName = "Entity";
+		std::string mMeshName = "Mesh";
+		OverPass::Entity* mEntity = mSceneManager->createEntity(mEntityName,mMeshName);
+
+	
+		mSceneNode->setPosition(OverPass::Vector3(0.0,0.0,200.0));
+		OverPass::Vector3 now = mSceneNode->getPosition();
+		mSceneNode->attachObject(mEntity);
+
+		OverPass::DX9RenderSystem* mRenderSys = new OverPass::DX9RenderSystem(Device,ToonEffect);
+		mSceneManager->_setDestinationRenderSystem(mRenderSys);
+
+		now.printf();
+		mSceneManager->_renderScene();
+		//printf("%f %f %f", now.x, now.y, now.z);
+		if (mEntity->isAttached())
+			printf("fuck\n");
+		else
+			printf("suck\n");
+
+	
+
+		
+	}
+	
+
 
 }
 void Update(HWND hwnd)
@@ -142,12 +196,12 @@ void Update(HWND hwnd)
 	g_pDInput->GetInput();
 
 	// 沿摄像机各分量移动视角
-	if (g_pDInput->IsKeyDown(DIK_A))  g_pCamera->MoveAlongRightVec(-4.0f);
-	if (g_pDInput->IsKeyDown(DIK_D))  g_pCamera->MoveAlongRightVec(4.0f);
-	if (g_pDInput->IsKeyDown(DIK_W)) g_pCamera->MoveAlongLookVec(4.0f);
-	if (g_pDInput->IsKeyDown(DIK_S))  g_pCamera->MoveAlongLookVec(-4.0f);
-	if (g_pDInput->IsKeyDown(DIK_R))  g_pCamera->MoveAlongUpVec(3.0f);
-	if (g_pDInput->IsKeyDown(DIK_F))  g_pCamera->MoveAlongUpVec(-3.0f);
+	if (g_pDInput->IsKeyDown(DIK_A))  g_pCamera->MoveAlongRightVec(-4.0f/5);
+	if (g_pDInput->IsKeyDown(DIK_D))  g_pCamera->MoveAlongRightVec(4.0f/5);
+	if (g_pDInput->IsKeyDown(DIK_W)) g_pCamera->MoveAlongLookVec(4.0f/5);
+	if (g_pDInput->IsKeyDown(DIK_S))  g_pCamera->MoveAlongLookVec(-4.0f/5);
+	if (g_pDInput->IsKeyDown(DIK_R))  g_pCamera->MoveAlongUpVec(3.0f/5);
+	if (g_pDInput->IsKeyDown(DIK_F))  g_pCamera->MoveAlongUpVec(-3.0f/5);
 
 	//沿摄像机各分量旋转视角
 	if (g_pDInput->IsKeyDown(DIK_LEFT))  g_pCamera->RotationUpVec(-0.003f);
@@ -222,7 +276,7 @@ bool Setup()
 	ID3DXBuffer* errorBuffer = 0;
 	hr = D3DXCreateEffectFromFile(
 		Device,           // associated device
-		L"shadowmap.txt", // effect filename
+		L"Common.txt", // effect filename
 		0,                // no preprocessor definitions
 		0,                // no ID3DXInclude interface
 		D3DXSHADER_USE_LEGACY_D3DX9_31_DLL,
@@ -274,6 +328,7 @@ void Display()
 		UINT numPasses = 0;
 
 		Device->BeginScene();
+		/*
 		SetRenderTarget(0, DepthScene);
 		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 120, 1.0f, 0);
 		ToonEffect->SetTechnique("Normal");
@@ -304,14 +359,14 @@ void Display()
 			ToonEffect->EndPass();
 		}
 		ToonEffect->End();
-
+		*/
 
 		IDirect3DSurface9* pd3dBackBufferSurface;
 		Device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pd3dBackBufferSurface);
 		Device->SetRenderTarget(0, pd3dBackBufferSurface);
 		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 120, 1.0f, 0);
-		ToonEffect->SetTexture("ShaderTexture", DepthScene);
-		ToonEffect->SetTechnique("Normal_S");
+		//ToonEffect->SetTexture("ShaderTexture", DepthScene);
+		ToonEffect->SetTechnique("Common");
 		numPasses = 0;
 		ToonEffect->Begin(&numPasses, 0);
 		for (int i = 0; i < numPasses; i++)
@@ -319,7 +374,7 @@ void Display()
 			ToonEffect->BeginPass(i);
 			D3DXMATRIX now = mTrans *  g_matWorld1 *matView * ProjMatrix;
 			D3DXMATRIX now2 = mTrans *  g_matWorld1 *PreView * ProjMatrix;
-			ToonEffect->SetMatrix("LightWorldViewProjMatrix", &now2);
+			//ToonEffect->SetMatrix("LightWorldViewProjMatrix", &now2);
 			ToonEffect->SetMatrix("WorldViewProjMatrix", &now);
 			meshP->DrawSubset(0);
 			ToonEffect->EndPass();
@@ -332,7 +387,7 @@ void Display()
 			ToonEffect->BeginPass(i);
 			D3DXMATRIX now = g_matWorld2  * matView   * ProjMatrix;
 			D3DXMATRIX now2 = g_matWorld2  * PreView * ProjMatrix;
-			ToonEffect->SetMatrix("LightWorldViewProjMatrix", &now2);
+			//ToonEffect->SetMatrix("LightWorldViewProjMatrix", &now2);
 			ToonEffect->SetMatrix("WorldViewProjMatrix", &now);
 			meshT->DrawSubset(0);
 			ToonEffect->EndPass();
@@ -430,3 +485,4 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+#endif

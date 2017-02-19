@@ -1,8 +1,10 @@
+
 #ifndef _Node_H__
 #define _Node_H__
 #include "OverPassPrerequisites.h"
 #include "OverPassQuaternion.h"
 #include "OverPassVector3.h"
+#include "OverPassMatrix4.h"
 namespace OverPass
 {
 	class Node
@@ -36,14 +38,16 @@ namespace OverPass
 		mutable Vector3 mDerivedScale;
 
 		void _updateFromParent(void) const;
-
-		virtual Node* createChildImpl(void) = 0;
-		virtual Node* createChildImpl(const std::string& name) = 0;
+		
+		
 
 	public :
 		Node();
 		Node(const std::string& name);
-		
+
+		//下面两个应该是纯虚数
+		virtual Node* createChildImpl(void)  = 0;
+		virtual Node* createChildImpl(const std::string& name) = 0;
 		virtual ~Node();
 
 		const std::string& getName(void) const { return mName; }
@@ -98,7 +102,7 @@ namespace OverPass
 		const Vector3 & _getDerivedPosition(void) const;
 		const Vector3 & _getDerivedScale(void) const;
 		virtual void updateFromParentImpl(void) const;
-
+		const Matrix4& _getFullTransform(void) const;
 	};
 }
 #endif // _Node_H_

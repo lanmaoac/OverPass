@@ -1,7 +1,7 @@
 #pragma once
 #include "OverPassPrerequisites.h"
+#include "OverPassVector3.h"
 
-#include  "OverPassVector3.h"
 namespace OverPass{
 
 	class Quaternion
@@ -28,7 +28,7 @@ namespace OverPass{
 		}
 		inline float operator [](const int i) const
 		{
-			assert(i < 4);
+			//assert(i < 4);
 			return *(&w + i);
 		}
 		inline float& operator[] (const int i)
@@ -47,8 +47,11 @@ namespace OverPass{
 		Quaternion operator+ (const Quaternion& rkQ) const;
 		Quaternion operator- (const Quaternion& rkQ) const;
 		Quaternion operator* (const Quaternion& rkQ) const;
+	
 		Quaternion operator* (float fScalar) const;
+		//Vector3 operator* (const Vector3& rkVector) const;
 		Quaternion operator- () const;
+		
 		inline bool operator== (const Quaternion& rhs) const
 		{
 			return (rhs.x == x) && (rhs.y == y) &&
@@ -56,9 +59,13 @@ namespace OverPass{
 		}
 		inline bool operator!= (const Quaternion& rhs) const
 		{
-			return !(*this == rhs);
+			bool now=(rhs.x == x) && (rhs.y == y) &&
+				(rhs.z == z) && (rhs.w == w);
+			return !now;
 		}
-		Vector3 operator* (const Vector3& v) const;
+
+		
+		
 		float normalise(void);
 		float Norm() const;
 

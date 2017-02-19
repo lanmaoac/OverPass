@@ -239,6 +239,10 @@ namespace OverPass {
 				return true;
 			return false;
 		}
+		void printf(void)
+		{
+			std::printf("%f %f %f\n",x,y,z);
+		}
 
 		/** Returns true if the vector's scalar components are all smaller
 		that the ones of the vector it is compared against.
